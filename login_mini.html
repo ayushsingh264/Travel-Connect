@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <link rel="stylesheet" href="style.css">
+
+
+    <style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background-color: #f4f4f4;
+        font-family: Arial, sans-serif;
+    }
+    
+    .login-container 
+    {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+    
+    input 
+    {
+        display: block;
+        width: 100%;
+        margin: 10px 0;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+    
+    button 
+    {
+        background-color: blue;
+        color: white;
+        padding: 10px;
+        border: none;
+        cursor: pointer;
+        width: 100%;
+        border-radius: 5px;
+    }
+    
+    button:hover 
+    {
+        background-color: darkblue;
+    }
+
+</style>
+
+
+</head>
+<body>
+    <div class="login-container">
+        <h2 id="login">Login</h2>
+        <input type="email" id="email" placeholder="Enter Email">
+        <input type="password" id="password" placeholder="Enter Password">
+        <button onclick="login()">Login</button>
+       
+    </div> 
+
+    <script>
+        async function login() 
+    {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const message = document.getElementById("message");
+
+    try {
+        const response = await fetch("http://127.0.0.1:5500/HTMl,CSS,JS/miniproject.html", 
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: json.stringify({ email, password }),
+        });
+
+        const data = await response.json();
+        message.innerText = data.message;
+
+    } catch (error) {
+        message.innerText = "Login failed! Try again.";
+    }
+}
+
+
+
+
+
+
+
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+
+const app = express();
+const PORT = 5000;
+const SECRET_KEY = "secret123";
+
+// Middleware
+app.use(express.json());
+app.use(cors());
+
+// Database Connection
+mongoose.connect("mongodb://127.0.0.1:27017/loginDB", { useNewUrlParser: true, useUnifiedTopology: true });
+
+// User Schema
+const UserSchema = new mongoose.Schema({
+    email: String,
+    password: String,
+});
+const User = mongoose.model("User", UserSchema);
+
+// Login Route
+app.post("/api/login", async (req, res) => {
+    const { email, password } = req.body;
+    
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.json({ message: "User not found!" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+        return res.json({ message: "Invalid credentials!" });
+    }
+
+    const token = jwt.sign({ email: user.email }, SECRET_KEY, { expiresIn: "1h" });
+    res.json({ message: "Login successful!", token });
+});
+
+// Start Server
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+});
+
+    </script>
+
+<script src="miniproject.js"></script>
+<script src="miniproject.node.js"></script>
+
+
+</body>
+</html>
